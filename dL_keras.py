@@ -1,4 +1,4 @@
-### Koniecznie Python 3.10 ( 3.8-3.11) inaczej tensorFlow odwala :)
+### Koniecznie Python 3.10 ( 3.8-3.11) inaczej tensorFlow odwala, przynajmniej w PyCharmie:)
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -68,28 +68,33 @@ for model in [model_relu, model_leaky]:
     )
 
 
+# funkcja hamulcowa - przerywa uczenie, jeśli nie poprawia sytuacji, chroni przed przeuczeniem.
+# monitor - obserwowany parametr, min delta - minimalna zmiana obserwowanego param. żeby iteracja była uznana za sensowną.
+# cierpliwość - liczba "bezsensownych" epok, zanim funkcja zatrzyma uczenie,
+# restore.... - jak sama nazwa wskazuje ;-)
+early_stop = EarlyStopping(monitor='val_loss', min_delta = 0.1, patience=10, restore_best_weights=True)
 
-early_stop = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+
 
 history_relu = model_relu.fit(
     x_train, y_train,
     validation_data=(x_val, y_val),
-    epochs=100,
+    epochs=50,
     batch_size=32,
     callbacks=[early_stop],
-    verbose=1
+    verbose=0
 )
 
 history_leaky = model_leaky.fit(
     x_train, y_train,
     validation_data=(x_val, y_val),
-    epochs=100,
+    epochs=50,
     batch_size=32,
     callbacks=[early_stop],
-    verbose=1
+    verbose=0
 )
 
-
+#obiekt model.evaluate() zwraca listę wartości wyników [funkcja straty, dokładność]
 loss_relu, acc_relu = model_relu.evaluate(x_test, y_test, verbose=1)
 loss_leaky, acc_leaky = model_leaky.evaluate(x_test, y_test, verbose=1)
 
@@ -97,7 +102,7 @@ print(f"ReLU   - Test Accuracy: {acc_relu:.4f}, Loss: {loss_relu:.4f}")
 print(f"LeakyR - Test Accuracy: {acc_leaky:.4f}, Loss: {loss_leaky:.4f}")
 
 
-
+##Wykresiki, bo wszyscy je kochamy.
 def plot_history(history1, history2, label1='ReLU', label2='LeakyReLU'):
     plt.figure(figsize=(14,5))
 
@@ -124,7 +129,11 @@ def plot_history(history1, history2, label1='ReLU', label2='LeakyReLU'):
 
 plot_history(history_relu, history_leaky)
 
+# zapisuje pliki z modelem do późniejszego użycia.
+#model.save("model_ReLu.keras")
+#model.save("model_LeakReLu.keras")
 
-model.save("model_ReLu.keras")
-model.save("model_LeakReLu.keras")
+#Mi się udało dojść do sporadycznych 93 % acc, manipulując ilościa epok, cierpliwością i batchem.
+#funkcję straty można by jeszcze rozważyć "focal_loss"
+# Powodzenia ! :D
 
