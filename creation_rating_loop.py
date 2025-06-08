@@ -8,7 +8,7 @@ from tensorflow.keras import Sequential, callbacks
 from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.activations import sigmoid
 from tensorflow.keras.layers import Dropout, BatchNormalization
-from tensorflow.keras.optimizers import AdamW
+from tensorflow.keras.optimizers import AdamW, SGD
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.metrics import Precision
 
@@ -31,7 +31,7 @@ neurons_qty_combinations:list = [[2, 4, 8, 16, 32, 16, 8, 4], #Do oceny
                            ]
 # Compiling
 optimizers_list:list = ["AdamW", "SGD"] #do oceny
-learning_rates_list:list = [0.001, 0.0005, 0.0001,0.1] # do oceny
+learning_rates_list:list = [0.001, 0.0005,0.1] # do oceny
 loss_fun_name_list:list = ["binary_crossentropy", "categorical_crossentropy", "hinge"] # do oceny
 momentum_val:float = 0.9 # [0 - 1]
 
