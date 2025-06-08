@@ -333,29 +333,22 @@ def plot_relevant_models(models, test_inputs, test_outputs, accuracy_threshold =
     sam model
     output model.fit - czyli history
     """
-    relevant_models = []
+    relevant_models = models[models['accuracy'] > accuracy_threshold].copy()
 
-    for model_info in models:
-        _model_name = model_info["name"]
-        model_obj = model_info["model"]
-        _model_history = model_info["history"]
+    pairs_of_models = list(itertools.combinations(relevant_models.iterrows(), 2))
 
-        # Evaluate the model on the test data to get its accuracy
-        # model.evaluate() returns a list, typically [loss, accuracy]
-        # We use verbose=0 to prevent printing evaluation progress.
-        _, accuracy = model_obj.evaluate(test_inputs, test_outputs, verbose=0)
 
-        # Check if the accuracy meets the threshold
-        if accuracy > accuracy_threshold:
-            # If it does, add the entire model_info dictionary to the new array
-            relevant_models.append(model_info)
+    for i, (model1_row_tuple, model2_row_tuple) in enumerate(pairs_of_models):
+        _, model1_data = model1_row_tuple
+        _, model2_data = model2_row_tuple
 
-    pairs = list(itertools.combinations(relevant_models, 2))
+        label1 = model1_data['name']
+        history1 = model1_data['history']
 
-    for i, pair in enumerate(pairs):
-        model1 = pair[0]
-        model2 = pair[1]
-        plot_history_comparison(model1["history"], model2["history"], label1=model1["name"], label2=model2["name"])
+        label2 = model2_data['name']
+        history2 = model2_data['history']
+
+        plot_history_comparison(history1, history2, label1=label1, label2=label2)
 
 def test_model(compilation_list, x_test, y_test):
     loss_test_res = []
@@ -367,8 +360,7 @@ def test_model(compilation_list, x_test, y_test):
         loss_test_res += [loss]
         acc_test_res += [acc]
         prec_test_res += [prec]
-
-    return loss_test_res, acc_test_res, prec_test_res
+    return acc_test_res, loss_test_res, prec_test_res
 
 def plot_history_comparison(history1, history2, label1='ReLU', label2='LeakyReLU'):
     plt.figure(figsize=(14,5))
@@ -451,7 +443,8 @@ def build_config_df(
     # Dodanie pozostałych parametrów (stałych)
     df["momentum"] = momentum_val
     df["min_delta"] = min_delta
-
+    df["max_test_accuracy"] = 0
+    df["best_model"] = None
     # Kolumny na wyniki i obiekty
     df["modele"] = None
     df["history"] = None
@@ -459,4 +452,11 @@ def build_config_df(
     df["test_loss"] = None
     df["test_precision"] = None
 
+    df['modele'] = df['modele'].astype(object)
+    df['modehistoryle'] = df['history'].astype(object)
+    df['test_accuracy'] = df['test_accuracy'].astype(object)
+    df['test_loss'] = df['test_loss'].astype(object)
+    df['test_precision'] = df['test_precision'].astype(object)
+
     return df
+
