@@ -61,11 +61,16 @@ def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,
     :return:
 
 
-    parametry zmieniane na sztywno między modelami
+    parametry zmieniane na sztywno między modelami:
+    funkcje aktywacji:
+
+    funkcje aktywacji wyjścia:
+
+    BatchNormalization:
     """
     compilation_list: list = []
 
-    # Model 1 – ReLU + BatchNormalization + sigmoid out.
+    # Model 0 – ReLU + BatchNormalization + sigmoid out.
     layer_list = [
         layer
         for i in range(layers_qty)
@@ -74,19 +79,54 @@ def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,
             BatchNormalization()
         )
     ]
+    # Definicja wyjścia
     output_layer: Dense = Dense(1, activation='sigmoid')
     layer_list.append(output_layer)
-
+    # Generowanie obiektu
     model_relu = Sequential(layer_list)
+    # append na return funkcji
     compilation_list.append(model_relu)
 
 
-    # Model 2 – LeakyReLU + BatchNormalization + sigmoid out.
-    model_leaky = Sequential([
-        Dense(64), BatchNormalization(), LeakyReLU(negative_slope=0.01),
-        Dense(32), BatchNormalization(), LeakyReLU(negative_slope=0.01),
-        Dense(1, activation='sigmoid')
-    ])
+
+
+
+    # Model 1 – LeakyReLU + BatchNormalization + sigmoid out.
+    layer_list = [
+        layer
+        for i in range(layers_qty)
+        for layer in (
+            Dense(neurons_qty_combination[i]), BatchNormalization(), LeakyReLU(negative_slope=0.01)
+        )
+    ]
+    # Definicja wyjścia
+    output_layer: Dense = Dense(1, activation='sigmoid')
+    layer_list.append(output_layer)
+    # Generowanie obiektu
+    model_leaky = Sequential(layer_list)
+    # append na return funkcji
+    compilation_list.append(model_relu)
+
+
+
+
+    # Model 2 – tanh + BatchNormalization + sigmoid out.
+    layer_list = [
+        layer
+        for i in range(layers_qty)
+        for layer in (
+            Dense(neurons_qty_combination[i],activation='tanh'), BatchNormalization()
+        )
+    ]
+    # Definicja wyjścia
+    output_layer: Dense = Dense(1, activation='sigmoid')
+    layer_list.append(output_layer)
+    # Generowanie obiektu
+    model_tanh = Sequential(layer_list)
+    # append na return funkcji
+    compilation_list.append(model_relu)
+
+
 
 
     return compilation_list
