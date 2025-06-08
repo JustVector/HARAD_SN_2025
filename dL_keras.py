@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-
+from sklearn.metrics import precision_score, recall_score, f1_score
 
 
 df = pd.read_csv("updated_version.csv")
@@ -41,6 +41,7 @@ from tensorflow.keras.activations import sigmoid
 from tensorflow.keras.layers import Dropout, BatchNormalization
 from tensorflow.keras.optimizers import AdamW
 from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.metrics import Precision
 
 
 # Model 1 – ReLU
@@ -64,7 +65,7 @@ for model in [model_relu, model_leaky]:
     model.compile(
         optimizer=AdamW(learning_rate=0.001),
         loss='binary_crossentropy',
-        metrics=['accuracy']
+        metrics=['accuracy', Precision()]
     )
 
 
@@ -95,11 +96,11 @@ history_leaky = model_leaky.fit(
 )
 
 #obiekt model.evaluate() zwraca listę wartości wyników [funkcja straty, dokładność]
-loss_relu, acc_relu = model_relu.evaluate(x_test, y_test, verbose=1)
-loss_leaky, acc_leaky = model_leaky.evaluate(x_test, y_test, verbose=1)
+loss_relu, acc_relu, prec_relu = model_relu.evaluate(x_test, y_test, verbose=1)
+loss_leaky, acc_leaky, prec_leaky = model_leaky.evaluate(x_test, y_test, verbose=1)
 
-print(f"ReLU   - Test Accuracy: {acc_relu:.4f}, Loss: {loss_relu:.4f}")
-print(f"LeakyR - Test Accuracy: {acc_leaky:.4f}, Loss: {loss_leaky:.4f}")
+print(f"ReLU   - Test Accuracy: {acc_relu:.4f}, Loss: {loss_relu:.4f}, Prec: {prec_relu:.4f}")
+print(f"LeakyR - Test Accuracy: {acc_leaky:.4f}, Loss: {loss_leaky:.4f}, Prec: {prec_leaky:.4f}")
 
 
 ##Wykresiki, bo wszyscy je kochamy.
@@ -133,7 +134,7 @@ plot_history(history_relu, history_leaky)
 #model.save("model_ReLu.keras")
 #model.save("model_LeakReLu.keras")
 
-#Mi się udało dojść do sporadycznych 93 % acc, manipulując ilościa epok, cierpliwością i batchem.
+#Mi się udało dojść do sporadycznych 93 % acc, średnio 92%, manipulując ilościa epok, cierpliwością i batchem.
 #funkcję straty można by jeszcze rozważyć "focal_loss"
 # Powodzenia ! :D
 
