@@ -1,7 +1,7 @@
 ### Koniecznie Python 3.10 ( 3.8-3.11) inaczej tensorFlow odwala, przynajmniej w PyCharmie:)
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import itertools
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score
@@ -61,7 +61,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     Przyjmuje zmienne:
     :param layers_qty: ilość warstw w modelu bez warstwy wyjściowej, int
     :param neurons_qty_combination:
-    :return:
+    :return: compilation_list
 
 
     parametry zmieniane na sztywno między modelami:
@@ -250,7 +250,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     return compilation_list
 
 
-def compile_model_seq(compilation_list:list,
+def compile_model_seq(compilation_list,
                       optimizer_name:str = "AdamW",
                       learning_rate_val:float = 0.001,
                       loss_fun_name:str = "binary_crossentropy",
@@ -295,15 +295,15 @@ def set_early_stop_function(min_delta:float=0.1, patience:int=10):
     early_stop = EarlyStopping(monitor='val_loss', min_delta=min_delta, patience=patience, restore_best_weights=True)
     return early_stop
 
-def train_model(model, data_list:list,
+def train_model(compilation_list, data_list:list,
                 early_stop = EarlyStopping(monitor='val_loss', min_delta=0.1, patience=10, restore_best_weights=True),
                 epochs:int = 50,
                 batch_size:int = 32,
                 verbose=2,
-                do_save:bool = False,):
+                do_save:bool = False):
     """
 
-    :param model:
+    :param compilation_list:
     :param data_list:
     :param early_stop:
     :param epochs:
@@ -311,21 +311,34 @@ def train_model(model, data_list:list,
     :param verbose:
     :return: history - obiekt zawierający dane z uczenia modelu.
     """
-
+    history = []
     x_train, x_val, x_test, y_train, y_val, y_test = data_list
-    pass
-    history = model.fit(x_train, y_train,
-                        validation_data=(x_val, y_val),
-                        epochs=epochs,
-                        batch_size=batch_size,
-                        callbacks=[early_stop],
-                        verbose=verbose
-                        )
-    if do_save:
-        model.save(f"{model}.keras")
+    for model in compilation_list:
+        history += model.fit(x_train, y_train,
+                            validation_data=(x_val, y_val),
+                            epochs=epochs,
+                            batch_size=batch_size,
+                            callbacks=[early_stop],
+                            verbose=verbose
+                            )
+        if do_save:
+            model.save(f"{model}.keras")
 
     return history
 
+
+def test_model(compilation_list, x_test, y_test):
+    loss_test_res = []
+    acc_test_res = []
+    prec_test_res = []
+    for model in compilation_list:
+        loss, acc, prec = model.evaluate(x_test, y_test, verbose=1)
+        print(f"ReLU   - Test Accuracy: {acc:.4f}, Loss: {loss:.4f}, Prec: {prec:.4f}")
+        loss_test_res += loss
+        acc_test_res += acc
+        prec_test_res += prec
+
+    return loss_test_res, acc_test_res, prec_test_res
 
 def plot_history_comparison(history1, history2, label1='ReLU', label2='LeakyReLU'):
     plt.figure(figsize=(14,5))
@@ -352,3 +365,68 @@ def plot_history_comparison(history1, history2, label1='ReLU', label2='LeakyReLU
     plt.show()
 
 
+
+def build_config_df(
+        layer_qty_list,
+        neurons_qty_combinations,
+        optimizers_list,
+        learning_rates_list,
+        loss_fun_name_list,
+        momentum_val,
+        min_delta,
+        patience_list,
+        epochs_list,
+        batch_size_list
+):
+
+    """
+
+
+    :param layer_qty_list:
+    :param neurons_qty_combinations:
+    :param optimizers_list:
+    :param learning_rates_list:
+    :param loss_fun_name_list:
+    :param momentum_val:
+    :param min_delta:
+    :param patience_list:
+    :param epochs_list:
+    :param batch_size_list:
+    :return:
+    """
+    # Tworzenie wszystkich kombinacji hiperparametrów
+    all_combinations = list(itertools.product(
+        layer_qty_list,
+        neurons_qty_combinations,
+        optimizers_list,
+        learning_rates_list,
+        loss_fun_name_list,
+        patience_list,
+        epochs_list,
+        batch_size_list
+    ))
+
+    # Budowa DataFrame
+    df = pd.DataFrame(all_combinations, columns=[
+        "layer_qty",
+        "neurons_qty_set",
+        "optimizer",
+        "learning_rate",
+        "loss_function",
+        "patience",
+        "epochs",
+        "batch_size"
+    ])
+
+    # Dodanie pozostałych parametrów (stałych)
+    df["momentum"] = momentum_val
+    df["min_delta"] = min_delta
+
+    # Kolumny na wyniki i obiekty
+    df["modele"] = None
+    df["history"] = None
+    df["test_accuracy"] = None
+    df["test_loss"] = None
+    df["test_precision"] = None
+
+    return df
