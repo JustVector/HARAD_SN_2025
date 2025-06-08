@@ -42,11 +42,11 @@ momentum_val:float = 0.9 # [0 - 1]
 
 #early stop
 min_delta:float = 0.01
-patience_list:list = [1, 10, 30, 100]
+patience_list:list = [15]
 
 #fitting
-epochs_list:list = [1, 10, 30, 50, 100]
-batch_size_list:list = [16, 32, 64]
+epochs_list:list = [1, 5]
+batch_size_list:list = [32]
 verbose:int = 0 #0,1,2
 
 ######loop Section#################################
@@ -74,6 +74,7 @@ the_df = km.build_config_df(
     #     df["min_delta"] = min_delta
     #
     # # Kolumny na wyniki i obiekty
+
     #     df["modele"] = None
     #     df["history"] = None
     #     df["test_accuracy"] = None

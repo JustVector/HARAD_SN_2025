@@ -331,7 +331,7 @@ def plot_relevant_models(models, test_inputs, test_outputs, accuracy_threshold =
     musimy zebrac 3 rzeczy
     label
     sam model
-    output model.fit
+    output model.fit - czyli history
     """
     relevant_models = []
 
