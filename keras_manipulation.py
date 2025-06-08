@@ -363,7 +363,7 @@ def test_model(compilation_list, x_test, y_test):
     return acc_test_res, loss_test_res, prec_test_res
 
 def plot_history_comparison(history1, history2, label1='ReLU', label2='LeakyReLU'):
-    plt.figure(figsize=(14,5))
+    plt.figure(figsize=(14, 5))
 
     # Accuracy
     plt.subplot(1, 2, 1)
@@ -478,13 +478,16 @@ def read_model_history(best_models_by_attribute:dict ):
 
             # przykład
             index = int(model["best_index"])
-            print(type(model["history"]))  # powinno być pd.Series
-            print(model["history"].shape)  # powinno być (9,)
-            print(model["history"].index)  # upewnij się, że są indeksy 0...8
-            print(model["best_index"])  # np. 3
+            # print(type(model["history"]))  # powinno być pd.Series
+            # print(model["history"].shape)  # powinno być (9,)
+            # print(model["history"].index)  # upewnij się, że są indeksy 0...8
+            # print(model["best_index"])  # np. 3
 
-            history = model["history"].iloc[index]
+            history = model["history"].loc[0][index]
+            print(history)
+            print(type(history))
 
+            plt.figure(figsize=(14, 5))
 
             plt.plot(history.history['val_accuracy'], label=f'{hyperparameter} = {model[hyperparameter]} - val acc')
             plt.title('Validation Accuracy')
@@ -492,4 +495,6 @@ def read_model_history(best_models_by_attribute:dict ):
             plt.ylabel('Accuracy')
             plt.legend()
 
+            plt.tight_layout()
+            plt.show()
 

@@ -40,7 +40,7 @@ min_delta:float = 0.01
 patience_list:list = [15]
 
 #fitting
-epochs_list:list = [1]#, 50]
+epochs_list:list = [50]#, 1]
 batch_size_list:list = [32]
 verbose:int = 0 #0,1,2
 
