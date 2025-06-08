@@ -16,10 +16,10 @@ from tensorflow.keras import Sequential, callbacks
 from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.activations import sigmoid
 from tensorflow.keras.layers import Dropout, BatchNormalization
-from tensorflow.keras.optimizers import AdamW
+from tensorflow.keras.optimizers import AdamW, SGD, Adam
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.metrics import Precision
-
+#tf.config.run_functions_eagerly(True)
 
 
 
@@ -264,20 +264,17 @@ def compile_model_seq(compilation_list,
     :param loss_fun_name: 'binary_crossentropy', categorical_crossentropy, hinge...
     :return:
     """
+    optim_dict = {
+        "SGD": "SGD(learning_rate=learning_rate_val, momentum=momentum_val, nesterov=True)",
+        "Adam": "Adam(learning_rate=learning_rate_val)",
+        "AdamW": "AdamW(learning_rate=learning_rate_val)"
+    }
 
-    if optimizer_name == "AdamW":
-        optimizer_formula:str = optimizer_name + f"(learning_rate={learning_rate_val})"
-    elif optimizer_name == "Adam":
-        optimizer_formula = optimizer_name + f"(learning_rate={learning_rate_val})"
-    elif optimizer_name == "SGD":
-        optimizer_formula = optimizer_name + f"(learning_rate={learning_rate_val}, momentum={momentum_val}, nesterov=True)"
-    else:
-        optimizer_formula = optimizer_name + f"(learning_rate={learning_rate_val})"
-
+    optimizer = optim_dict[optimizer_name]
 
     for model in compilation_list:
         model.compile(
-            optimizer=eval(optimizer_formula),
+            optimizer=eval(optimizer),
             loss=loss_fun_name,
             metrics=['accuracy', Precision()]
         )
@@ -474,27 +471,30 @@ def read_model_history(best_models_by_attribute:dict ):
     ]
     for hyperparameter in hyperparameter_columns:
         if hyperparameter in best_models_by_attribute:
-            model = best_models_by_attribute[hyperparameter]
+            models = best_models_by_attribute[hyperparameter]
+            for idx, model in models.iterrows():
+                index = int(model["best_index"])
+                history = model["history"][index]
 
-            # przykład
-            index = int(model["best_index"])
-            # print(type(model["history"]))  # powinno być pd.Series
-            # print(model["history"].shape)  # powinno być (9,)
-            # print(model["history"].index)  # upewnij się, że są indeksy 0...8
-            # print(model["best_index"])  # np. 3
+                plt.figure(figsize=(14, 5))
 
-            history = model["history"].loc[0][index]
-            print(history)
-            print(type(history))
+                plt.subplot(1, 2, 1)
+                plt.plot(history.history['val_accuracy'], label=f'{hyperparameter} = {model[hyperparameter]} - val acc')
+                plt.title('Validation Accuracy')
+                plt.xlabel(hyperparameter)
+                plt.ylabel('Accuracy')
+                plt.legend()
 
-            plt.figure(figsize=(14, 5))
 
-            plt.plot(history.history['val_accuracy'], label=f'{hyperparameter} = {model[hyperparameter]} - val acc')
-            plt.title('Validation Accuracy')
-            plt.xlabel(hyperparameter)
-            plt.ylabel('Accuracy')
-            plt.legend()
+                # Loss
+                plt.subplot(1, 2, 2)
+                plt.plot(history.history['val_loss'], label=f'{hyperparameter} = {model[hyperparameter]} - val loss')
 
-            plt.tight_layout()
-            plt.show()
+                plt.title('Validation Loss')
+                plt.xlabel(hyperparameter)
+                plt.ylabel('Loss')
+                plt.legend()
 
+                plt.tight_layout()
+                plt.savefig(f"{hyperparameter}.png")
+                plt.show()

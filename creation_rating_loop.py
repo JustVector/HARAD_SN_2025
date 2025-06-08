@@ -23,15 +23,15 @@ from sklearn.metrics import precision_score, recall_score, f1_score
 #####config Section###############################
 # file_name:str = "C:\\Users\\loern\\eszi\\nowy\\HARAD_SN_2025\\updated_version.csv"
 file_name:str = "updated_version.csv"
-layer_qty_list = [1]#,2,4,8] #do oceny
+layer_qty_list = [1]#,2,4]#,8] #do oceny
 neurons_qty_combinations:list = [[2, 4, 8, 16, 32, 16, 8, 4], #Do oceny
-                        #    [8, 8, 16, 16, 8, 8, 16, 16],
+                          #        [8, 8, 16, 16, 8, 8, 16, 16],
                         #    [128, 64, 32, 16, 8, 4, 2, 1],
                         #    [16, 8, 32, 2, 8, 16, 4, 8]
                            ]
 # Compiling
 optimizers_list:list = ["AdamW"]#, "SGD"] #do oceny
-learning_rates_list:list = [0.001]#, 0.0005]#, 0.1] # do oceny
+learning_rates_list:list = [0.001, 0.1]#, 0.0005]#, 0.1] # do oceny
 loss_fun_name_list:list = ["binary_crossentropy"]#, "categorical_crossentropy"]#], "hinge"] # do oceny
 momentum_val:float = 0.9 # [0 - 1]
 
@@ -40,7 +40,7 @@ min_delta:float = 0.01
 patience_list:list = [15]
 
 #fitting
-epochs_list:list = [50]#, 1]
+epochs_list:list = [1]#, 40]
 batch_size_list:list = [32]
 verbose:int = 0 #0,1,2
 
@@ -96,8 +96,6 @@ best_models_by_attribute = {}
 
 for col in hyperparameter_columns:
     best_rows = the_df.loc[the_df.groupby(col)['max_test_accuracy'].idxmax()]
-    print(best_rows)
-
     best_models_by_attribute[col] = best_rows
     for index, row in best_rows.iterrows():
         print(f"  {col}: {row[col]} -> Best Accuracy: {row['max_test_accuracy']:.4f}")
