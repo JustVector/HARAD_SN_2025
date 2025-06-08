@@ -227,6 +227,7 @@ def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,
 
 
     # Model 9 – Realy LeakyReLU + BatchNormalization + sigmoid out.
+    input_layer_set = [Dense(64, activation='relu', input_shape=(10,))]
     layer_list = [
         layer
         for i in range(layers_qty)
@@ -241,6 +242,9 @@ def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,
     model_leakyRelu_hardSigmoid = Sequential(layer_list)
     # append na return funkcji
     compilation_list.append(model_relu)
+
+###################################################################################################################
+#Modele z warstwami innymi niż dense()
 
 
     return compilation_list
