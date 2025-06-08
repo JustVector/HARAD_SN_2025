@@ -1,5 +1,3 @@
-from logging import raiseExceptions
-
 import keras_manipulation as km
 ### Koniecznie Python 3.10 ( 3.8-3.11) inaczej tensorFlow odwala, przynajmniej w PyCharmie:)
 
@@ -22,22 +20,19 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score
 
 
-
-
-
 #####config Section###############################
 file_name:str = "updated_version.csv"
 
-layer_qty_list = [1,2,4,8]
-neurons_qty_combinations:list = [[2, 4, 8, 16, 32, 16, 8, 4],
+layer_qty_list = [1,2,4,8] #do oceny
+neurons_qty_combinations:list = [[2, 4, 8, 16, 32, 16, 8, 4], #Do oceny
                            [8, 8, 16, 16, 8, 8, 16, 16],
                            [128, 64, 32, 16, 8, 4, 2, 1],
                            [16, 8, 32, 2, 8, 16, 4, 8]
                            ]
 # Compiling
-optimizers_list:list = ["AdamW", "SGD"]
-learning_rates_list:list = [0.001, 0.0005, 0.0001,0.1]
-loss_fun_name_list:list = ["binary_crossentropy", "categorical_crossentropy", "hinge"]
+optimizers_list:list = ["AdamW", "SGD"] #do oceny
+learning_rates_list:list = [0.001, 0.0005, 0.0001,0.1] # do oceny
+loss_fun_name_list:list = ["binary_crossentropy", "categorical_crossentropy", "hinge"] # do oceny
 momentum_val:float = 0.9 # [0 - 1]
 
 #early stop
@@ -103,6 +98,5 @@ for idx, row in the_df.iterrows():
     # testuj modele
     row["test_accuracy"], row["test_loss"], row["test_precision"] = km.test_model(row["modele"],data_set[2], data_set[5])
 
-    # porównaj dwa
-    km.plot_history_comparison(row["history"][1],row["history"][0])
+#######Sekcja doboru istotnych modeli######################
 
