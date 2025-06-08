@@ -146,12 +146,10 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
 
     # Model 4 – ReLu + NO_BatchNormalization + sigmoid out.
     layer_list = [
-        layer
+        Dense(neurons_qty_combination[i], activation='relu')
         for i in range(layers_qty)
-        for layer in (
-            Dense(neurons_qty_combination[i], activation='relu')
-        )
     ]
+
     # Definicja wyjścia
     output_layer: Dense = Dense(1, activation='sigmoid')
     layer_list.append(output_layer)
@@ -316,13 +314,13 @@ def train_model(compilation_list, data_list:list,
     history = []
     x_train, x_val, x_test, y_train, y_val, y_test = data_list
     for model in compilation_list:
-        history += model.fit(x_train, y_train,
+        history.append(model.fit(x_train, y_train,
                             validation_data=(x_val, y_val),
                             epochs=epochs,
                             batch_size=batch_size,
                             callbacks=[early_stop],
                             verbose=verbose
-                            )
+                            ))
         if do_save:
             model.save(f"{model}.keras")
 
@@ -366,9 +364,9 @@ def test_model(compilation_list, x_test, y_test):
     for model in compilation_list:
         loss, acc, prec = model.evaluate(x_test, y_test, verbose=1)
         print(f"ReLU   - Test Accuracy: {acc:.4f}, Loss: {loss:.4f}, Prec: {prec:.4f}")
-        loss_test_res += loss
-        acc_test_res += acc
-        prec_test_res += prec
+        loss_test_res += [loss]
+        acc_test_res += [acc]
+        prec_test_res += [prec]
 
     return loss_test_res, acc_test_res, prec_test_res
 
