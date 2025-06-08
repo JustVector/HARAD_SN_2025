@@ -55,7 +55,10 @@ def set_df(file_name: str, test_sample_part_ratio: float = 0.2, validation_sampl
 
 def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,32]):
     """
+    Generuje modele wg. definicji:
+    pozycja na liście kompilacji, funkcja aktywacji, BatchNormalization() + funkcja na wyjściu
 
+    Przyjmuje zmienne:
     :param layers_qty: ilość warstw w modelu bez warstwy wyjściowej, int
     :param neurons_qty_combination:
     :return:
@@ -88,9 +91,6 @@ def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,
     compilation_list.append(model_relu)
 
 
-
-
-
     # Model 1 – LeakyReLU + BatchNormalization + sigmoid out.
     layer_list = [
         layer
@@ -106,8 +106,6 @@ def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,
     model_leaky = Sequential(layer_list)
     # append na return funkcji
     compilation_list.append(model_relu)
-
-
 
 
     # Model 2 – tanh + BatchNormalization + sigmoid out.
@@ -127,6 +125,122 @@ def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,
     compilation_list.append(model_relu)
 
 
+    # Model 3 – tanh + NO_BatchNormalization + sigmoid out.
+    layer_list = [
+        layer
+        for i in range(layers_qty)
+        for layer in (
+            Dense(neurons_qty_combination[i], activation='tanh'), BatchNormalization()
+        )
+    ]
+    # Definicja wyjścia
+    output_layer: Dense = Dense(1, activation='sigmoid')
+    layer_list.append(output_layer)
+    # Generowanie obiektu
+    model_tanh = Sequential(layer_list)
+    # append na return funkcji
+    compilation_list.append(model_relu)
+
+
+    # Model 4 – ReLu + NO_BatchNormalization + sigmoid out.
+    layer_list = [
+        layer
+        for i in range(layers_qty)
+        for layer in (
+            Dense(neurons_qty_combination[i], activation='relu')
+        )
+    ]
+    # Definicja wyjścia
+    output_layer: Dense = Dense(1, activation='sigmoid')
+    layer_list.append(output_layer)
+    # Generowanie obiektu
+    model_relu_noBatchNorm = Sequential(layer_list)
+    # append na return funkcji
+    compilation_list.append(model_relu)
+
+
+    # Model 5 – ReLu + BatchNormalization + Hard sigmoid out.
+    layer_list = [
+        layer
+        for i in range(layers_qty)
+        for layer in (
+            Dense(neurons_qty_combination[i], activation='relu'), BatchNormalization()
+        )
+    ]
+    # Definicja wyjścia
+    output_layer: Dense = Dense(1, activation='hard_sigmoid')
+    layer_list.append(output_layer)
+    # Generowanie obiektu
+    model_relu_hardSigmoid = Sequential(layer_list)
+    # append na return funkcji
+    compilation_list.append(model_relu)
+
+
+    # Model 6 – ReLu + BatchNormalization + Hard sigmoid out.
+    layer_list = [
+        layer
+        for i in range(layers_qty)
+        for layer in (
+            Dense(neurons_qty_combination[i], activation='relu'), BatchNormalization()
+        )
+    ]
+    # Definicja wyjścia
+    output_layer: Dense = Dense(1, activation='hard_sigmoid')
+    layer_list.append(output_layer)
+    # Generowanie obiektu
+    model_relu_hardSigmoid = Sequential(layer_list)
+    # append na return funkcji
+    compilation_list.append(model_relu)
+
+
+    # Model 7 – LeakyReLU + BatchNormalization + Hard sigmoid out.
+    layer_list = [
+        layer
+        for i in range(layers_qty)
+        for layer in (
+            Dense(neurons_qty_combination[i]), BatchNormalization(), LeakyReLU(negative_slope=0.01)
+        )
+    ]
+    # Definicja wyjścia
+    output_layer: Dense = Dense(1, activation='hard_sigmoid')
+    layer_list.append(output_layer)
+    # Generowanie obiektu
+    model_leakyRelu_hardSigmoid = Sequential(layer_list)
+    # append na return funkcji
+    compilation_list.append(model_relu)
+
+    # Model 8 – Realy LeakyReLU + BatchNormalization + Hard sigmoid out.
+    layer_list = [
+        layer
+        for i in range(layers_qty)
+        for layer in (
+            Dense(neurons_qty_combination[i]), BatchNormalization(), LeakyReLU(negative_slope=0.1)
+        )
+    ]
+    # Definicja wyjścia
+    output_layer: Dense = Dense(1, activation='hard_sigmoid')
+    layer_list.append(output_layer)
+    # Generowanie obiektu
+    model_leakyRelu_hardSigmoid = Sequential(layer_list)
+    # append na return funkcji
+    compilation_list.append(model_relu)
+
+
+    # Model 9 – Realy LeakyReLU + BatchNormalization + sigmoid out.
+    layer_list = [
+        layer
+        for i in range(layers_qty)
+        for layer in (
+            Dense(neurons_qty_combination[i]), BatchNormalization(), LeakyReLU(negative_slope=0.1)
+        )
+    ]
+    # Definicja wyjścia
+    output_layer: Dense = Dense(1, activation='sigmoid')
+    layer_list.append(output_layer)
+    # Generowanie obiektu
+    model_leakyRelu_hardSigmoid = Sequential(layer_list)
+    # append na return funkcji
+    compilation_list.append(model_relu)
 
 
     return compilation_list
