@@ -53,7 +53,7 @@ def set_df(file_name: str, test_sample_part_ratio: float = 0.2, validation_sampl
 
 
 
-def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,32]):
+def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64,32]):
     """
     Generuje modele wg. definicji:
     pozycja na liście kompilacji, funkcja aktywacji, BatchNormalization() + funkcja na wyjściu
@@ -244,7 +244,46 @@ def set_keras_models_set(layers_qty:int = 3, neurons_qty_combination:list = [64,
     compilation_list.append(model_relu)
 
 ###################################################################################################################
-#Modele z warstwami innymi niż dense()
+#Modele z warstwami innymi niż dense() ?
 
 
     return compilation_list
+
+
+def compile_model_seq(compilation_list:list,
+                      optimizer_name:str = "AdamW",
+                      learning_rate_val:float = 0.001,
+                      loss_fun_name:str = "binary_crossentropy",
+                      momentum_val:float = 0.9
+                      ):
+    """
+
+    :param compilation_list: list from set_keras_models_list()
+    :param optimazer_name: AdamW, Adam, SGD
+    :param learning_rate:
+    :param loss_fun_name:
+    :return:
+    """
+    model_seq = []
+
+    if optimizer_name == "AdamW":
+        optimizer_formula:str = optimizer_name + f"(learning_rate={learning_rate_val})"
+    elif optimizer_name == "Adam":
+        optimizer_formula = optimizer_name + f"(learning_rate={learning_rate_val})"
+    elif optimizer_name == "SGD":
+        optimizer_formula = optimizer_name + f"(learning_rate={learning_rate_val}, momentum={momentum_val}, nesterov=True)"
+    else:
+        optimizer_formula = optimizer_name
+
+
+    for model in compilation_list:
+        model.compile(
+            optimizer=eval(optimizer_formula),
+            loss=loss_fun_name,
+            metrics=['accuracy', Precision()]
+        )
+        model_seq.append(model)
+
+    return
+
+
