@@ -356,10 +356,10 @@ def test_model(compilation_list, x_test, y_test):
     prec_test_res = []
     for model in compilation_list:
         loss, acc, prec = model.evaluate(x_test, y_test, verbose=1)
-        print(f"ReLU   - Test Accuracy: {acc:.4f}, Loss: {loss:.4f}, Prec: {prec:.4f}")
-        loss_test_res += [loss]
-        acc_test_res += [acc]
-        prec_test_res += [prec]
+        print(f"Test Accuracy: {acc:.4f}, Loss: {loss:.4f}, Prec: {prec:.4f}")
+        loss_test_res.append(loss)
+        acc_test_res.append(acc)
+        prec_test_res.append(prec)
     return acc_test_res, loss_test_res, prec_test_res
 
 def plot_history_comparison(history1, history2, label1='ReLU', label2='LeakyReLU'):
@@ -445,6 +445,7 @@ def build_config_df(
     df["min_delta"] = min_delta
     df["max_test_accuracy"] = 0
     df["best_model"] = None
+    df["best_index"] = 0
     # Kolumny na wyniki i obiekty
     df["modele"] = None
     df["history"] = None
@@ -453,10 +454,42 @@ def build_config_df(
     df["test_precision"] = None
 
     df['modele'] = df['modele'].astype(object)
-    df['modehistoryle'] = df['history'].astype(object)
+    df['history'] = df['history'].astype(object)
     df['test_accuracy'] = df['test_accuracy'].astype(object)
     df['test_loss'] = df['test_loss'].astype(object)
     df['test_precision'] = df['test_precision'].astype(object)
 
     return df
+
+
+def read_model_history(best_models_by_attribute:dict ):
+    hyperparameter_columns = [
+        'layer_qty',
+        'optimizer',
+        'learning_rate',
+        'loss_function',
+        'patience',
+        'epochs',
+        'batch_size'
+    ]
+    for hyperparameter in hyperparameter_columns:
+        if hyperparameter in best_models_by_attribute:
+            model = best_models_by_attribute[hyperparameter]
+
+            # przykład
+            index = int(model["best_index"])
+            print(type(model["history"]))  # powinno być pd.Series
+            print(model["history"].shape)  # powinno być (9,)
+            print(model["history"].index)  # upewnij się, że są indeksy 0...8
+            print(model["best_index"])  # np. 3
+
+            history = model["history"].iloc[index]
+
+
+            plt.plot(history.history['val_accuracy'], label=f'{hyperparameter} = {model[hyperparameter]} - val acc')
+            plt.title('Validation Accuracy')
+            plt.xlabel(hyperparameter)
+            plt.ylabel('Accuracy')
+            plt.legend()
+
 

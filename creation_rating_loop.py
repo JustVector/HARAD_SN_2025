@@ -1,13 +1,3 @@
-
-
-# import sys
-# import os
-
-# # You need to go UP one level ('..') then DOWN into 'a_level_up/common_libs'
-# utility_dir = os.path.join("C:\\Users\\loern\\eszi\\nowy\\HARAD_SN_2025\\")
-
-# sys.path.append(utility_dir)
-
 import keras_manipulation as km
 ### Koniecznie Python 3.10 ( 3.8-3.11) inaczej tensorFlow odwala, przynajmniej w PyCharmie:)
 
@@ -41,8 +31,8 @@ neurons_qty_combinations:list = [[2, 4, 8, 16, 32, 16, 8, 4], #Do oceny
                            ]
 # Compiling
 optimizers_list:list = ["AdamW"]#, "SGD"] #do oceny
-learning_rates_list:list = [0.001, 0.0005]#, 0.1] # do oceny
-loss_fun_name_list:list = ["binary_crossentropy", "categorical_crossentropy"]#], "hinge"] # do oceny
+learning_rates_list:list = [0.001]#, 0.0005]#, 0.1] # do oceny
+loss_fun_name_list:list = ["binary_crossentropy"]#, "categorical_crossentropy"]#], "hinge"] # do oceny
 momentum_val:float = 0.9 # [0 - 1]
 
 #early stop
@@ -50,7 +40,7 @@ min_delta:float = 0.01
 patience_list:list = [15]
 
 #fitting
-epochs_list:list = [1, 5]
+epochs_list:list = [1]#, 50]
 batch_size_list:list = [32]
 verbose:int = 0 #0,1,2
 
@@ -69,6 +59,10 @@ the_df = km.build_config_df(
         batch_size_list
 )
 
+
+
+#####modeling Section #############################
+
 #[x_train, x_val, x_test, y_train, y_val, y_test]
 data_set:list = km.set_df(file_name=file_name)
 
@@ -78,6 +72,7 @@ for idx, row in the_df.iterrows():
     EarlyStop = km.set_early_stop_function(min_delta, patience=row["patience"])
     history = km.train_model(modele, data_set, EarlyStop, row["epochs"], row["batch_size"], verbose=verbose, do_save=False)
     test_acc, test_loss, test_prec = km.test_model(modele, data_set[2], data_set[5])
+
     the_df.at[idx, "modele"] = modele
     the_df.at[idx, "history"] = history
     the_df.at[idx, "test_accuracy"] = test_acc
@@ -85,6 +80,7 @@ for idx, row in the_df.iterrows():
     the_df.at[idx, "test_precision"] = test_prec
     the_df.loc[idx, "max_test_accuracy"] = max(test_acc)
     the_df.loc[idx, "best_model"] = modele[test_acc.index(max(test_acc))]
+    the_df.loc[idx, "best_index"] = test_acc.index(max(test_acc))
 
 hyperparameter_columns = [
     'layer_qty',
@@ -96,11 +92,14 @@ hyperparameter_columns = [
     'batch_size'
 ]
 
-best_models_by_attribute = pd.DataFrame()
+best_models_by_attribute = {}
 
 for col in hyperparameter_columns:
     best_rows = the_df.loc[the_df.groupby(col)['max_test_accuracy'].idxmax()]
+    print(best_rows)
+
     best_models_by_attribute[col] = best_rows
     for index, row in best_rows.iterrows():
         print(f"  {col}: {row[col]} -> Best Accuracy: {row['max_test_accuracy']:.4f}")
 
+km.read_model_history(best_models_by_attribute)
