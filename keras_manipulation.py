@@ -51,7 +51,7 @@ def set_df(file_name: str, test_sample_part_ratio: float = 0.2, validation_sampl
     print("x_val:", x_val.shape[0])
     print("x_test:", x_test.shape[0])
 
-
+    return [x_train, x_val, x_test, y_train, y_val, y_test]
 
 def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64,32]):
     """
@@ -257,14 +257,13 @@ def compile_model_seq(compilation_list:list,
                       momentum_val:float = 0.9
                       ):
     """
-
+    kompiluje modele z zadanej listy wg. wskazanych parametrów
     :param compilation_list: list from set_keras_models_list()
     :param optimazer_name: AdamW, Adam, SGD
     :param learning_rate:
-    :param loss_fun_name:
+    :param loss_fun_name: 'binary_crossentropy', categorical_crossentropy, hinge...
     :return:
     """
-    model_seq = []
 
     if optimizer_name == "AdamW":
         optimizer_formula:str = optimizer_name + f"(learning_rate={learning_rate_val})"
@@ -273,7 +272,7 @@ def compile_model_seq(compilation_list:list,
     elif optimizer_name == "SGD":
         optimizer_formula = optimizer_name + f"(learning_rate={learning_rate_val}, momentum={momentum_val}, nesterov=True)"
     else:
-        optimizer_formula = optimizer_name
+        optimizer_formula = optimizer_name + f"(learning_rate={learning_rate_val})"
 
 
     for model in compilation_list:
@@ -282,8 +281,74 @@ def compile_model_seq(compilation_list:list,
             loss=loss_fun_name,
             metrics=['accuracy', Precision()]
         )
-        model_seq.append(model)
 
     return
+
+
+def set_early_stop_function(min_delta:float=0.1, patience:int=10):
+    """
+    zwraca postać funkcji "hamulcowej"
+    :param min_delta: zakres [0.0-1.0]
+    :param patience:
+    :return:early_stop
+    """
+    early_stop = EarlyStopping(monitor='val_loss', min_delta=min_delta, patience=patience, restore_best_weights=True)
+    return early_stop
+
+def train_model(model, data_list:list,
+                early_stop = EarlyStopping(monitor='val_loss', min_delta=0.1, patience=10, restore_best_weights=True),
+                epochs:int = 50,
+                batch_size:int = 32,
+                verbose=2,
+                do_save:bool = False,):
+    """
+
+    :param model:
+    :param data_list:
+    :param early_stop:
+    :param epochs:
+    :param batch_size:
+    :param verbose:
+    :return: history - obiekt zawierający dane z uczenia modelu.
+    """
+
+    x_train, x_val, x_test, y_train, y_val, y_test = data_list
+    pass
+    history = model.fit(x_train, y_train,
+                        validation_data=(x_val, y_val),
+                        epochs=epochs,
+                        batch_size=batch_size,
+                        callbacks=[early_stop],
+                        verbose=verbose
+                        )
+    if do_save:
+        model.save(f"{model}.keras")
+
+    return history
+
+
+def plot_history_comparison(history1, history2, label1='ReLU', label2='LeakyReLU'):
+    plt.figure(figsize=(14,5))
+
+    # Accuracy
+    plt.subplot(1, 2, 1)
+    plt.plot(history1.history['val_accuracy'], label=f'{label1} - val acc')
+    plt.plot(history2.history['val_accuracy'], label=f'{label2} - val acc')
+    plt.title('Validation Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+
+    # Loss
+    plt.subplot(1, 2, 2)
+    plt.plot(history1.history['val_loss'], label=f'{label1} - val loss')
+    plt.plot(history2.history['val_loss'], label=f'{label2} - val loss')
+    plt.title('Validation Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
 
 
