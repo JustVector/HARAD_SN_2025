@@ -6,6 +6,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score
 
+import itertools
+
 ########## model#############
 import tensorflow as tf
 from tensorflow import keras
@@ -105,7 +107,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     # Generowanie obiektu
     model_leaky = Sequential(layer_list)
     # append na return funkcji
-    compilation_list.append(model_relu)
+    compilation_list.append(model_leaky)
 
 
     # Model 2 – tanh + BatchNormalization + sigmoid out.
@@ -122,7 +124,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     # Generowanie obiektu
     model_tanh = Sequential(layer_list)
     # append na return funkcji
-    compilation_list.append(model_relu)
+    compilation_list.append(model_tanh)
 
 
     # Model 3 – tanh + NO_BatchNormalization + sigmoid out.
@@ -137,9 +139,9 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     output_layer: Dense = Dense(1, activation='sigmoid')
     layer_list.append(output_layer)
     # Generowanie obiektu
-    model_tanh = Sequential(layer_list)
+    model_tanh2 = Sequential(layer_list)
     # append na return funkcji
-    compilation_list.append(model_relu)
+    compilation_list.append(model_tanh2)
 
 
     # Model 4 – ReLu + NO_BatchNormalization + sigmoid out.
@@ -156,7 +158,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     # Generowanie obiektu
     model_relu_noBatchNorm = Sequential(layer_list)
     # append na return funkcji
-    compilation_list.append(model_relu)
+    compilation_list.append(model_relu_noBatchNorm)
 
 
     # Model 5 – ReLu + BatchNormalization + Hard sigmoid out.
@@ -173,7 +175,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     # Generowanie obiektu
     model_relu_hardSigmoid = Sequential(layer_list)
     # append na return funkcji
-    compilation_list.append(model_relu)
+    compilation_list.append(model_relu_hardSigmoid)
 
 
     # Model 6 – ReLu + BatchNormalization + Hard sigmoid out.
@@ -190,7 +192,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     # Generowanie obiektu
     model_relu_hardSigmoid = Sequential(layer_list)
     # append na return funkcji
-    compilation_list.append(model_relu)
+    compilation_list.append(model_relu_hardSigmoid)
 
 
     # Model 7 – LeakyReLU + BatchNormalization + Hard sigmoid out.
@@ -207,7 +209,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     # Generowanie obiektu
     model_leakyRelu_hardSigmoid = Sequential(layer_list)
     # append na return funkcji
-    compilation_list.append(model_relu)
+    compilation_list.append(model_leakyRelu_hardSigmoid)
 
     # Model 8 – Realy LeakyReLU + BatchNormalization + Hard sigmoid out.
     layer_list = [
@@ -223,7 +225,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     # Generowanie obiektu
     model_leakyRelu_hardSigmoid = Sequential(layer_list)
     # append na return funkcji
-    compilation_list.append(model_relu)
+    compilation_list.append(model_leakyRelu_hardSigmoid)
 
 
     # Model 9 – Realy LeakyReLU + BatchNormalization + sigmoid out.
@@ -241,7 +243,7 @@ def set_keras_models_list(layers_qty:int = 3, neurons_qty_combination:list = [64
     # Generowanie obiektu
     model_leakyRelu_hardSigmoid = Sequential(layer_list)
     # append na return funkcji
-    compilation_list.append(model_relu)
+    compilation_list.append(model_leakyRelu_hardSigmoid)
 
 ###################################################################################################################
 #Modele z warstwami innymi niż dense() ?
@@ -326,6 +328,36 @@ def train_model(compilation_list, data_list:list,
 
     return history
 
+def plot_relevant_models(models, test_inputs, test_outputs, accuracy_threshold = 0.9):
+    """
+    musimy zebrac 3 rzeczy
+    label
+    sam model
+    output model.fit
+    """
+    relevant_models = []
+
+    for model_info in models:
+        _model_name = model_info["name"]
+        model_obj = model_info["model"]
+        _model_history = model_info["history"]
+
+        # Evaluate the model on the test data to get its accuracy
+        # model.evaluate() returns a list, typically [loss, accuracy]
+        # We use verbose=0 to prevent printing evaluation progress.
+        _, accuracy = model_obj.evaluate(test_inputs, test_outputs, verbose=0)
+
+        # Check if the accuracy meets the threshold
+        if accuracy > accuracy_threshold:
+            # If it does, add the entire model_info dictionary to the new array
+            relevant_models.append(model_info)
+
+    pairs = list(itertools.combinations(relevant_models, 2))
+
+    for i, pair in enumerate(pairs):
+        model1 = pair[0]
+        model2 = pair[1]
+        plot_history_comparison(model1["history"], model2["history"], label1=model1["name"], label2=model2["name"])
 
 def test_model(compilation_list, x_test, y_test):
     loss_test_res = []
