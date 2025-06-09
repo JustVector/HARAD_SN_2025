@@ -13,7 +13,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.metrics import Precision
 
 import pandas as pd
-import matplotlib.pyplot as plt
+
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -23,16 +23,16 @@ from sklearn.metrics import precision_score, recall_score, f1_score
 #####config Section###############################
 # file_name:str = "C:\\Users\\loern\\eszi\\nowy\\HARAD_SN_2025\\updated_version.csv"
 file_name:str = "updated_version.csv"
-layer_qty_list = [1]#,2,4]#,8] #do oceny
+layer_qty_list = [1,2,4]#,8] #do oceny
 neurons_qty_combinations:list = [[2, 4, 8, 16, 32, 16, 8, 4], #Do oceny
-                          #        [8, 8, 16, 16, 8, 8, 16, 16],
+                                 [8, 8, 16, 16, 8, 8, 16, 16],
                         #    [128, 64, 32, 16, 8, 4, 2, 1],
                         #    [16, 8, 32, 2, 8, 16, 4, 8]
                            ]
 # Compiling
-optimizers_list:list = ["AdamW"]#, "SGD"] #do oceny
+optimizers_list:list = ["AdamW", "SGD"] #do oceny
 learning_rates_list:list = [0.001, 0.1]#, 0.0005]#, 0.1] # do oceny
-loss_fun_name_list:list = ["binary_crossentropy"]#, "categorical_crossentropy"]#], "hinge"] # do oceny
+loss_fun_name_list:list = ["binary_crossentropy", "categorical_crossentropy"]#, "hinge"] # do oceny
 momentum_val:float = 0.9 # [0 - 1]
 
 #early stop
@@ -40,7 +40,7 @@ min_delta:float = 0.01
 patience_list:list = [15]
 
 #fitting
-epochs_list:list = [1]#, 40]
+epochs_list:list = [5, 30]
 batch_size_list:list = [32]
 verbose:int = 0 #0,1,2
 
@@ -61,7 +61,7 @@ the_df = km.build_config_df(
 
 
 
-#####modeling Section #############################
+
 
 #[x_train, x_val, x_test, y_train, y_val, y_test]
 data_set:list = km.set_df(file_name=file_name)
@@ -82,6 +82,9 @@ for idx, row in the_df.iterrows():
     the_df.loc[idx, "best_model"] = modele[test_acc.index(max(test_acc))]
     the_df.loc[idx, "best_index"] = test_acc.index(max(test_acc))
 
+
+
+#####modeling Section #############################
 hyperparameter_columns = [
     'layer_qty',
     'optimizer',
